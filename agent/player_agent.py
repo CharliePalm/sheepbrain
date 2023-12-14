@@ -3,15 +3,17 @@ from engine.game import Hand, Card, Player, Trick
 import numpy as np
 from typing import List, Dict, Tuple
 from copy import deepcopy
+from .train_agent import TrainAgent
 '''
 class to be used for making decisions about a game state
 '''
 class PlayerAgent(Player):
     current_player_hand: List[Card]
-    
+    train_agent: TrainAgent
     def __init__(self, id: player_id):
         self.play_model = self.init_play_model()
         self.pick_model = self.init_pick_model()
+        self.train_agent = TrainAgent()
         super().__init__(id)
 
     def init_play_model(self):
@@ -36,7 +38,7 @@ class PlayerAgent(Player):
         model_input = []
         for action in self.get_valid_actions(trick):
             trick.cards.append(action)
-            model_input.append(self.compile_game_state(hand, trick))
+            model_input.append(self.train_agent.compile_game_state(hand, trick))
             valid_actions.append(action)
             trick.cards.pop()
         results = self.play_model.predict(model_input) if self.play_model else self.random_choice(valid_actions)
@@ -68,24 +70,8 @@ class PlayerAgent(Player):
         return res
             
         
-    def play_card(self, hand: Hand, trick: Trick) -> None:
+    def play_card(self, hand: Hand, trick: Trick) -> Card:
         decision = self.play_decision(hand, trick)
         self.played_card(decision)
         trick.play(decision)
-        
-    def compile_game_state(self, hand: Hand, trick: Trick) -> np.ndarray:
-        network_input = np.zeros((6, 5, 13))
-        hand.tricks.append(trick)
-        for idx, trick in enumerate(hand.tricks):
-            for jdx, card in enumerate(trick.cards):
-                network_input[idx][jdx] = self.get_card_one_hot(card, hand)
-        hand.tricks.pop()
-        return network_input
-
-    def compile_pick_state(self) -> np.ndarray:
-        network_input = np.empty((6, 12))
-        for idx, card in enumerate(self.current_player_hand):
-            network_input[idx] = suit_one_hot[card.suit] + num_one_hot[card.num]
-    
-    def get_card_one_hot(self, card: Card, hand: Hand) -> List[int]:
-        return suit_one_hot[card.suit] + num_one_hot[card.num] + picker_one_hot[card.parent == hand.picker_id]
+        return decision

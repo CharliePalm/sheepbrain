@@ -1,2 +1,7 @@
 *__pycache__*
 *.pyc*
+.build
+.env
+lib
+*package-lock.json
+*node_modules

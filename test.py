@@ -1,6 +1,7 @@
 from unittest import TestCase, main
 from engine import game, model
 from agent.player_agent import PlayerAgent
+from agent.train_agent import TrainAgent
 from agent.game_agent import GameAgent
 from copy import deepcopy
 
@@ -24,12 +25,16 @@ class TestCards(TestCase):
         pass
     
 class TestPlayerAgent(TestCase):
-    agent = PlayerAgent(model.player_id.a)
+    def test_player(self):
+        pass
+
+class TestTrainAgent(TestCase):
+    agent = TrainAgent()
     def test_one_hot(self):
         card = game.Card(model.CardSuit.spades, model.CardNum.ace)
         card.parent = 0
         hand = game.Hand()
-        hand.picker = game.Player(model.player_id.a)
+        hand.picker_id = model.player_id.a
         result = self.agent.get_card_one_hot(card, hand)
         self.assertEqual(result, [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0])
 
@@ -71,7 +76,7 @@ class TestGame(TestCase):
         p.id = game.player_id.e
         self.assertEqual(p.left_player(), game.player_id.a)
 
-    def test_next_player(self):
+    def test_prev_player(self):
         p = PlayerAgent(game.player_id.a)
         self.assertEqual(p.right_player(), game.player_id.e)
         p.id = game.player_id.b

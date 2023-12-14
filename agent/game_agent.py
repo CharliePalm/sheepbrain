@@ -4,6 +4,8 @@ from numpy.random import shuffle
 from typing import List, Dict
 from .player_agent import PlayerAgent
 from numpy.random import choice
+from MCTS.data import HandSet
+
 class GameAgent:
     deck: List[game.Card] = []
     player_agents: Dict[model.player_id, PlayerAgent] = {}
@@ -11,10 +13,13 @@ class GameAgent:
     leader: game.player_id
     hand: game.Hand
     verbose: bool
+    data: HandSet
     
-    def __init__(self, verbose = False):
+    def __init__(self, verbose = False, training = False):
         self.init_deck()
         self.verbose = verbose
+        self.training = training
+        self.data = HandSet()
     
     def init_deck(self):
         self.deck = []
@@ -64,13 +69,14 @@ class GameAgent:
                     if c.suit == partner_jack_suit:
                         self.hand.partner_id = p_id
                         return
-                    
     
     def trick(self):
         player = self.player_agents[self.leader]
         trick = game.Trick()
         for i in range(5):
-            player.play_card(self.hand, trick)
+            card = player.play_card(self.hand, trick)
+            if self.training:
+                self.data.add(card)
             player = self.next_player(player)
             if self.verbose:
                 # print(model.suit_to_emoji[trick.cards[-1].suit], trick.cards[-1].num.value)
@@ -79,7 +85,6 @@ class GameAgent:
         self.leader = self.player_agents[winning_card.parent].id
         self.hand.tricks.append(trick)
 
-    
     def update_score(self):
         points = self.hand.get_outcome_points()
         for id in self.player_agents:
@@ -91,11 +96,7 @@ class GameAgent:
                 self.scoreboard[id] += points['defender']
         if self.verbose:
            print(self.scoreboard)
-        if sum(list(dict.values(self.scoreboard))) != 0:
-            print('sum error')
-            exit(1)
 
-    
     def commence(self):
         for id in model.player_id:
             self.player_agents[id] = PlayerAgent(id)
@@ -105,7 +106,6 @@ class GameAgent:
             self.hand = game.Hand()
             self.shuffle_deck()
             self.deal_cards()
-            
             self.determine_picker()
             if not self.hand.picker_id:
                 continue # TODO handle 'leaster' hand
