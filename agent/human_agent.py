@@ -7,10 +7,10 @@ from .train_agent import TrainAgent
 '''
 class used for human interaction with game
 '''
-class PlayerAgent(Player):
+class HumanAgent(Player):
     current_player_hand: List[Card]
     train_agent: TrainAgent
-    def __init__(self, id: player_id):
+    def __init__(self, id: player_id, use_api = False):
         self.play_model = self.init_play_model()
         self.pick_model = self.init_pick_model()
         self.train_agent = TrainAgent()
@@ -29,7 +29,6 @@ class PlayerAgent(Player):
         for card in actions:
             res[str(card.suit.value+card.num.value)] = ((1 if card == card_choice else 0), card)
         return res
-            
         
     def play_card(self, hand: Hand, trick: Trick) -> Card:
         decision = self.play_decision(hand, trick)

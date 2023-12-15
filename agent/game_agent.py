@@ -5,6 +5,7 @@ from typing import List, Dict
 from .player_agent import PlayerAgent
 from numpy.random import choice
 from MCTS.data import HandSet
+from .human_agent import HumanAgent
 
 class GameAgent:
     deck: List[game.Card] = []
@@ -14,6 +15,7 @@ class GameAgent:
     hand: game.Hand
     verbose: bool
     data: HandSet
+    max_points = model.MAX_POINTS
     
     def __init__(self, verbose = False, training = False):
         self.init_deck()
@@ -97,12 +99,15 @@ class GameAgent:
         if self.verbose:
            print(self.scoreboard)
 
-    def commence(self):
+    def simulate(self):
         for id in model.player_id:
             self.player_agents[id] = PlayerAgent(id)
             self.scoreboard[id] = 0
         self.leader = choice(list(self.player_agents.keys()))
-        while max(dict.values(self.scoreboard)) < model.MAX_POINTS:
+        self.play()
+
+    def play(self):
+        while max(dict.values(self.scoreboard)) < self.max_points:
             self.hand = game.Hand()
             self.shuffle_deck()
             self.deal_cards()
@@ -112,3 +117,11 @@ class GameAgent:
             for _ in range(6):
                 self.trick()
             self.update_score()
+    
+    def player_vs_bots(self):
+        for idx, id in enumerate(model.player_id):
+            if idx == 0:
+                self.player_agents[id] = HumanAgent(id)
+            else:
+                self.player_agents[id] = PlayerAgent(id)
+            self.scoreboard[id] = 0
