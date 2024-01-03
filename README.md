@@ -1,6 +1,6 @@
 # SHEEPBRAIN
 
-SHEEPBRAIN is currently an engine for playing the classic Wisconsin card game Sheepshead/Sheephead in python. The goal of this project is to create a neural network for classifying monte-carlo tree search nodes - this is in progress.
+SHEEPBRAIN is currently an engine for playing the classic Wisconsin card game Sheepshead/Sheephead in python. The goal of this project is to create a neural network for classifying monte-carlo tree search nodes, as this is one of few non-probabilistic card games - this is in progress.
 
 ## Usage
 all that's supported right now is running a completely random simulation:
